@@ -24,7 +24,8 @@ export default {
 	// [[triggers]] configuration.
 	async scheduled(event, env, ctx) {
 		const login = JSON.parse(env.fullworkslogin);
-		const loginPage = await fetch(env.loginurl);
+		const loginPageResponse = await fetch(env.loginurl);
+		const cookie = loginPageResponse.headers.get("_tfw_key");
 
 		let csrfToken = "";
 
@@ -37,6 +38,12 @@ export default {
 
 		await rewriter.transform(response).text();
 
-		console.log("Extracted CSRF Token:", csrfToken);
+		/* curl -v --url 'https://gamma.myfullworks.com/users/sign_in' \
+			-H 'Content-Type: application/x-www-form-urlencoded' \
+			-b '_tfw_key=XCP.ya-PETlOavTctbGbt00RQq_KEj_zLUS2agOju2TEb6DBLh9UKck5VqM-vAwWP5Tu0btByhT4aseFroeoMXuGL6SyeX5dyAF81AXz32Bby1ZJg1UdykhDayRPOqD1GGtA0jq0mVuWRXHIflnqq9cghdiFwAleOltQ' \
+			-H 'Referer: https://gamma.myfullworks.com/users/sign_in' \
+			--data-raw '_csrf_token=JlQJa1hhPWwXEHA6FglxV0kYA3ozSTwXd7ZZkSn5GF4xQcCoyBY3K9eB&user%5Bemail%5D=me%40justaverylee.com&user%5Bpassword%5D=FixtheL8%21'
+		*/
+		log.info("Resulting keys: csrf = " + csrfToken + ", cookie = " + cookie);
 	},
 };
