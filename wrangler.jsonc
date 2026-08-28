@@ -14,16 +14,4 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
-	// "secrets_store_secrets": [
-	// 	{
-	// 		"binding": "googleserviceaccount",
-	// 		"store_id": "3d5a953b43d04149827e03bbb5d15d70",
-	// 		"secret_name": "google_sheets_service_account"
-	// 	},
-	// 	{
-	// 		"binding": "fullworkslogin",
-	// 		"store_id": "3d5a953b43d04149827e03bbb5d15d70",
-	// 		"secret_name": "fullworks_login"
-	// 	}
-	// ],
 }

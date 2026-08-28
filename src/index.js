@@ -6,7 +6,7 @@
  * https://developers.cloudflare.com/workers/platform/triggers/cron-triggers/
  *
  * - Run `npm run dev` in your terminal to start a development server
- * - Run `curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"` to see your worker in action
+ * - Run `curl "http://localhost:8787/__scheduled?cron=0+*+*+*+*"` to see your worker in action
  * - Run `npm run deploy` to publish your worker
  *
  * Learn more at https://developers.cloudflare.com/workers/
@@ -23,15 +23,20 @@ export default {
 	// The scheduled handler is invoked at the interval set in our wrangler.jsonc's
 	// [[triggers]] configuration.
 	async scheduled(event, env, ctx) {
-		// A Cron Trigger can make requests to other endpoints on the Internet,
-		// publish to a Queue, query a D1 Database, and much more.
-		//
-		// We'll keep it simple and make an API call to a Cloudflare API:
-		let resp = await fetch('https://api.cloudflare.com/client/v4/ips');
-		let wasSuccessful = resp.ok ? 'success' : 'fail';
+		const login = JSON.parse(env.fullworkslogin);
+		const loginPage = await fetch(env.loginurl);
 
-		// You could store this result in KV, write to a D1 Database, or publish to a Queue.
-		// In this template, we'll just log the result:
-		console.log(`trigger fired at ${event.cron}: ${wasSuccessful}`);
+		let csrfToken = "";
+
+		// Set up HTMLRewriter to target the specific input field
+		const rewriter = new HTMLRewriter().on('input[name="_csrf_token"]', {
+			element(element) {
+				csrfToken = element.getAttribute("value") || "";
+			},
+		});
+
+		await rewriter.transform(response).text();
+
+		console.log("Extracted CSRF Token:", csrfToken);
 	},
 };
