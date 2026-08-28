@@ -36,7 +36,7 @@ export default {
 			},
 		});
 
-		await rewriter.transform(response).text();
+		await rewriter.transform(loginPageResponse).text();
 
 		/* curl -v --url 'https://gamma.myfullworks.com/users/sign_in' \
 			-H 'Content-Type: application/x-www-form-urlencoded' \
