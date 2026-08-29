@@ -7,7 +7,7 @@
     "enabled": true,
   },
   "triggers": {
-    "crons": ["0 * * * *"],
+    "crons": ["*/30 14-23 * * *", "*/30 0-6 * * *", "0 7-13 * * *"],
   },
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
