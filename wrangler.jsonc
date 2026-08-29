@@ -11,6 +11,7 @@
   },
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
+    "baseurl": "https://gamma.myfullworks.com",
     "loginurl": "https://gamma.myfullworks.com/users/sign_in",
     "orderurl": "https://gamma.myfullworks.com/admin/1446/orders?labels%5B%5D=checkbox-true&labels%5B%5D=name-true&labels%5B%5D=number-true&labels%5B%5D=created_at-true&labels%5B%5D=state-true&labels%5B%5D=total_price_in_cents-true&labels%5B%5D=payment_method-false&labels%5B%5D=email-false&labels%5B%5D=subscription-false&labels%5B%5D=total_weight-false&labels%5B%5D=action-true&page=1&status%5B%5D=init",
     "sheetid": "1WsYOyBbwbB6MAV16oiH0ZdgzyRDzrE6FDfbahPtnqpA",

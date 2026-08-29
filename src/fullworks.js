@@ -1,11 +1,5 @@
-import puppeteer from '@cloudflare/puppeteer';
-
-export default async function loginAndReadOrders(env) {
+export async function login(page, env) {
   const login = JSON.parse(env.fullworkslogin);
-
-  let browser;
-  browser = await puppeteer.launch(env.FullWorks);
-  const page = await browser.newPage();
 
   // 1. Navigate to login page
   await page.goto(env.loginurl, {
@@ -25,15 +19,15 @@ export default async function loginAndReadOrders(env) {
     page.waitForNavigation({ waitUntil: 'networkidle0' }),
     page.click('#login_form button'),
   ]);
+}
 
-  // 5. Navigate to orders page using active browser session
+export async function getOrders(page, env) {
   const targetUrl = env.orderurl;
   await page.goto(targetUrl, { waitUntil: 'networkidle0' });
 
   // Wait for table
   await page.waitForSelector('#orders-table');
 
-  // 6. Extract and parse row data
   const orders = await page.evaluate(() => {
     const rows = Array.from(
       document.querySelectorAll('#orders-table tr.group')
@@ -68,7 +62,67 @@ export default async function loginAndReadOrders(env) {
     });
   });
 
-  await browser.close();
-
   return orders;
+}
+
+export async function fetchOrderDetails(detailsUrl, page) {
+  try {
+    // Navigate to the full order details page using the active browser session
+    await page.goto(detailsUrl, { waitUntil: 'networkidle0' });
+
+    // Extract details directly from the DOM
+    const details = await page.evaluate(() => {
+      // Helper function to find text in table rows by matching label cells
+      function getValueByLabel(labelText) {
+        const rows = Array.from(document.querySelectorAll('tr'));
+        for (const row of rows) {
+          const cells = Array.from(row.querySelectorAll('td'));
+          if (cells.length >= 2 && cells[0].textContent.includes(labelText)) {
+            return cells[1].textContent.trim();
+          }
+        }
+        return '';
+      }
+
+      // 1. Parse Shipping Method (Fulfillment)
+      const fulfillment = getValueByLabel('Shipping Method') || 'Unknown';
+
+      // 2. Parse Email
+      const email = getValueByLabel('Email') || '';
+
+      // 3. Parse Units (Summing up the 'Quantity' column from #order-items)
+      let totalUnits = 0;
+      const orderItemsTable = document.querySelector('#order-items');
+
+      if (orderItemsTable) {
+        // Only select item rows (skipping subtotal/tax summary rows)
+        const itemRows = Array.from(
+          orderItemsTable.querySelectorAll('tr.group')
+        );
+
+        for (const row of itemRows) {
+          const cells = Array.from(row.querySelectorAll('td'));
+          // Quantity is in the 3rd column (index 2)
+          if (cells.length >= 3) {
+            const qtyText = cells[2].textContent.trim();
+            const qty = parseInt(qtyText, 10);
+            if (!isNaN(qty)) {
+              totalUnits += qty;
+            }
+          }
+        }
+      }
+
+      return {
+        email,
+        fulfillment,
+        units: totalUnits,
+      };
+    });
+
+    return details;
+  } catch (error) {
+    console.error(`Failed to fetch details for ${detailsUrl}:`, error);
+    throw error;
+  }
 }
