@@ -1,10 +1,6 @@
 import puppeteer from '@cloudflare/puppeteer';
 import { fetchOrderDetails, getOrders, login } from './fullworks';
-import {
-  getExistingOrderKeys,
-  getToken,
-  syncOrdersToGoogleSheet,
-} from './google';
+import { getExistingOrders, getToken, syncOrdersToGoogleSheet } from './google';
 
 export default {
   async fetch(req) {
@@ -20,7 +16,7 @@ export default {
     let browser;
     try {
       const googleToken = await getToken(env);
-      const { headers, existingOrderRowMap } = await getExistingOrderKeys(
+      const { headers, existingOrderRowMap } = await getExistingOrders(
         googleToken,
         env
       );
@@ -35,10 +31,15 @@ export default {
       for (const order of orders) {
         const orderKey = String(order.orderNumber).trim();
         const isNewOrder = !existingOrderRowMap.has(orderKey);
-        if (isNewOrder && order.detailsUrl) {
+        let needsDetails = isNewOrder;
+        if (!needsDetails) {
+          const prior = existingOrderRowMap.get(orderKey);
+          needsDetails = !prior.units || !prior.fulfillment || !prior.email;
+        }
+        if (needsDetails && order.detailsUrl) {
           const detailsUrl = `${env.baseurl}${order.detailsUrl}`;
           order.details = await fetchOrderDetails(detailsUrl, page);
-          console.log("enriched new order" + JSON.stringify(order));
+          console.log('enriched new order' + JSON.stringify(order));
         }
       }
 

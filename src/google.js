@@ -97,7 +97,7 @@ export async function getToken(env) {
   return tokenData.access_token;
 }
 
-export async function getExistingOrderKeys(token, env) {
+export async function getExistingOrders(token, env) {
   const spreadsheetId = env.sheetid;
   const sheetName = env.sheetname;
 
@@ -106,16 +106,27 @@ export async function getExistingOrderKeys(token, env) {
     headers: { Authorization: `Bearer ${token}` },
   });
   const sheetData = await getRes.json();
-  const rows = sheetData.values || [];  if (rows.length === 0) return { headers: [], existingOrderRowMap: new Map() };
+  const rows = sheetData.values || [];
+  if (rows.length === 0) return { headers: [], existingOrderRowMap: new Map() };
 
   const headers = rows[0];
   const orderNumColIdx = headers.indexOf('Order Number');
+  const unitsColIdx = headers.indexOf('Units');
+  const fulfillmentIdx = headers.indexOf('Pickup Method');
+  const emailColIdx = headers.indexOf('Email');
   const existingOrderRowMap = new Map();
 
   if (orderNumColIdx !== -1) {
     for (let r = 1; r < rows.length; r++) {
       const orderNo = String(rows[r][orderNumColIdx] || '').trim();
-      if (orderNo) existingOrderRowMap.set(orderNo, r + 1);
+      if (orderNo) {
+        existingOrderRowMap.set(orderNo, {
+          row: r + 1,
+          units: rows[r][unitsColIdx],
+          fulfillment: rows[r][fulfillmentIdx],
+          email: rows[r][emailColIdx],
+        });
+      }
     }
   }
 
@@ -144,7 +155,7 @@ export async function syncOrdersToGoogleSheet(
 
     if (existingOrderRowMap.has(orderKey)) {
       // Existing order -> update status/system values in place
-      const targetRow = existingOrderRowMap.get(orderKey);
+      const targetRow = existingOrderRowMap.get(orderKey).row;
 
       Object.entries(systemCols).forEach(([colName, getValue]) => {
         // Skip detail updates for existing orders if details weren't scraped
