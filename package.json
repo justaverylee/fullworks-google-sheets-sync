@@ -1,13 +1,24 @@
 {
-	"name": "cool-lake-cd76",
-	"version": "0.0.0",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev --test-scheduled",
-		"start": "wrangler dev --test-scheduled"
-	},
-	"devDependencies": {
-		"wrangler": "^4.127.0"
-	}
+  "name": "fullworks-google-sheets-sync",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --test-scheduled",
+    "start": "wrangler dev --test-scheduled",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "wrangler": "^4.127.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true,
+    "workerd@1.20260826.1": true
+  },
+  "dependencies": {
+    "@cloudflare/puppeteer": "^1.4.0"
+  }
 }
