@@ -4,7 +4,7 @@ import { getExistingOrders, getToken, syncOrdersToGoogleSheet } from './google';
 
 export default {
   async fetch(req, env) {
-    await scheduled(env);
+    await this.scheduled(env);
     return new Response(
       `A run has been completed.`
     );
