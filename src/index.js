@@ -3,16 +3,14 @@ import { fetchOrderDetails, getOrders, login } from './fullworks';
 import { getExistingOrders, getToken, syncOrdersToGoogleSheet } from './google';
 
 export default {
-  async fetch(req) {
-    const url = new URL(req.url);
-    url.pathname = '/__scheduled';
-    url.searchParams.append('cron', '0 * * * *');
+  async fetch(req, env) {
+    await scheduled(env);
     return new Response(
-      `To test the scheduled handler, ensure you have used the "--test-scheduled" then try running "curl ${url.href}".`
+      `A run has been completed.`
     );
   },
 
-  async scheduled(event, env, ctx) {
+  async scheduled(event, env) {
     let browser;
     try {
       const googleToken = await getToken(env);
