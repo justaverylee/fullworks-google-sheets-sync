@@ -4,7 +4,7 @@ import { getExistingOrders, getToken, syncOrdersToGoogleSheet } from './google';
 
 export default {
   async fetch(req, env) {
-    const { pathname } = new URL(request.url);
+    const { pathname } = new URL(req.url);
     if (pathname === '/') {
       await this.scheduled(req, env);
       return new Response(
