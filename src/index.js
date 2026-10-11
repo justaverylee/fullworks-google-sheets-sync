@@ -4,10 +4,14 @@ import { getExistingOrders, getToken, syncOrdersToGoogleSheet } from './google';
 
 export default {
   async fetch(req, env) {
-    await this.scheduled(req, env);
-    return new Response(
-      `A run has been completed.`
-    );
+    const { pathname } = new URL(request.url);
+    if (pathname === '/') {
+      await this.scheduled(req, env);
+      return new Response(
+        `A run has been completed.`
+      );
+    }
+    return new Response(`To trigger a run use base path`, {status: 404})
   },
 
   async scheduled(event, env) {
