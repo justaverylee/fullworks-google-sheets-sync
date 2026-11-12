@@ -7,11 +7,9 @@ export default {
     const { pathname } = new URL(req.url);
     if (pathname === '/') {
       await this.scheduled(req, env);
-      return new Response(
-        `A run has been completed.`
-      );
+      return new Response(`A run has been completed.`);
     }
-    return new Response(`To trigger a run use base path`, {status: 404})
+    return new Response(`To trigger a run use base path`, { status: 404 });
   },
 
   async scheduled(event, env) {
@@ -38,7 +36,12 @@ export default {
           const prior = existingOrderRowMap.get(orderKey);
           needsDetails = !prior.units || !prior.fulfillment || !prior.email;
           if (prior.name != order.name) {
-            console.log("Name difference for order #", orderKey, prior.name, order.name);
+            console.log(
+              'Name difference for order #',
+              orderKey,
+              prior.name,
+              order.name
+            );
           }
         }
         if (needsDetails && order.detailsUrl) {

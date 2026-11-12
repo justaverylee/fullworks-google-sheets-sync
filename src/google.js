@@ -207,15 +207,47 @@ export async function syncOrdersToGoogleSheet(
 
   // Append new rows
   if (rowsToAppend.length > 0) {
+    console.log(
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A1:append?valueInputOption=USER_ENTERED`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ values: rowsToAppend }),
+        }
+      ).then(p => p.json())
+    );
+    // Sorts the new row into appropiate place
     await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A1:append?valueInputOption=USER_ENTERED`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
       {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ values: rowsToAppend }),
+        body: JSON.stringify({
+          requests: [
+            {
+              sortRange: {
+                range: {
+                  sheetId: 0,
+                  startRowIndex: 1,
+                  startColumnIndex: 0,
+                },
+                sortSpecs: [
+                  {
+                    dimensionIndex: headers.indexOf('Name'),
+                    sortOrder: 'ASCENDING',
+                  },
+                ],
+              },
+            },
+          ],
+        }),
       }
     );
   }
