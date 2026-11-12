@@ -113,6 +113,7 @@ export async function getExistingOrders(token, env) {
   const orderNumColIdx = headers.indexOf('Order Number');
   const unitsColIdx = headers.indexOf('Units');
   const fulfillmentIdx = headers.indexOf('Pickup Method');
+  const nameColIdx = headers.indexOf('Name');
   const emailColIdx = headers.indexOf('Email');
   const existingOrderRowMap = new Map();
 
@@ -125,6 +126,7 @@ export async function getExistingOrders(token, env) {
           units: rows[r][unitsColIdx],
           fulfillment: rows[r][fulfillmentIdx],
           email: rows[r][emailColIdx],
+          name: rows[r][nameColIdx],
         });
       }
     }

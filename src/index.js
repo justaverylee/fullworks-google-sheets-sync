@@ -37,6 +37,9 @@ export default {
         if (!needsDetails) {
           const prior = existingOrderRowMap.get(orderKey);
           needsDetails = !prior.units || !prior.fulfillment || !prior.email;
+          if (prior.name != order.name) {
+            console.log("Name difference for order #", orderKey, prior.name, order.name);
+          }
         }
         if (needsDetails && order.detailsUrl) {
           const detailsUrl = `${env.baseurl}${order.detailsUrl}`;
