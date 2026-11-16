@@ -1,6 +1,7 @@
 import puppeteer from '@cloudflare/puppeteer';
 import { fetchOrderDetails, getOrders, login } from './fullworks';
 import { getExistingOrders, getToken, syncOrdersToGoogleSheet } from './google';
+import { getShippoToken, parseAddress, createShippoOrder } from './shippo';
 
 export default {
   async fetch(req, env) {
@@ -28,6 +29,8 @@ export default {
 
       orders.sort((a, b) => a.orderNumber - b.orderNumber);
 
+      const shippoToken = await getShippoToken(env);
+
       for (const order of orders) {
         const orderKey = String(order.orderNumber).trim();
         const isNewOrder = !existingOrderRowMap.has(orderKey);
@@ -48,6 +51,13 @@ export default {
           const detailsUrl = `${env.baseurl}${order.detailsUrl}`;
           order.details = await fetchOrderDetails(detailsUrl, page);
           console.log('enriched new order' + JSON.stringify(order));
+          if (order.details.fulfillment === 'Shipping') {
+            const address = await parseAddress(
+              shippoToken,
+              order.details.shippingAddress
+            );
+            await createShippoOrder(shippoToken, address, order);
+          }
         }
       }
 

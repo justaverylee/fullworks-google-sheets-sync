@@ -90,6 +90,17 @@ export async function fetchOrderDetails(detailsUrl, page) {
       // 2. Parse Email
       const email = getValueByLabel('Email') || '';
 
+      const shippingHeading = Array.from(
+        document.querySelectorAll('h1')
+      ).find((heading) => heading.textContent.trim() === 'Shipping address');
+      const addressCard = shippingHeading?.closest('.rounded-lg');
+      const shippingAddress = Array.from(
+        addressCard?.querySelectorAll('div.text-md.leading-6 p') || []
+      )
+        .map((paragraph) => paragraph.textContent.trim())
+        .filter(Boolean)
+        .join('\n');
+
       // 3. Parse Units (Summing up the 'Quantity' column from #order-items)
       let totalUnits = 0;
       const orderItemsTable = document.querySelector('#order-items');
@@ -117,6 +128,7 @@ export async function fetchOrderDetails(detailsUrl, page) {
         email,
         fulfillment,
         units: totalUnits,
+        shippingAddress,
       };
     });
 
